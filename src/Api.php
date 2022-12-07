@@ -14,19 +14,16 @@ use LaravelEnso\Api\Contracts\QueryParameters;
 use LaravelEnso\Api\Contracts\Retry;
 use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\UsesAuth;
-use LaravelEnso\Api\Enums\Authorization;
-use LaravelEnso\Api\Enums\Methods;
-use LaravelEnso\Api\Enums\ResponseCodes;
+use LaravelEnso\Api\Enums\Method;
+use LaravelEnso\Api\Enums\ResponseCode;
 
 class Api
 {
     protected int $tries;
-    protected string $method;
 
     public function __construct(protected Endpoint $endpoint)
     {
         $this->tries = 0;
-        $this->method = $endpoint->method();
     }
 
     public function call(): Response
@@ -70,7 +67,7 @@ class Api
         }
 
         return $http->withOptions(['debug' => Config::get('enso.api.debug')])
-            ->{$this->method}($this->url(), $this->body());
+            ->{$this->endpoint->method()->value}($this->url(), $this->body());
     }
 
     protected function headers(): array
@@ -82,9 +79,8 @@ class Api
         }
 
         if ($this->endpoint instanceof UsesAuth) {
-            $token = $this->endpoint->tokenProvider()->current();
-            $type = Authorization::get($this->endpoint->tokenProvider()->type());
-            $headers['Authorization'] = "{$type} {$token}";
+            $token = $this->endpoint->tokenProvider();
+            $headers['Authorization'] = "{$token->type()->value} {$token->current()}";
         }
 
         return $headers;
@@ -99,13 +95,13 @@ class Api
     protected function possibleTokenExpiration(Response $response): bool
     {
         return $this->endpoint instanceof UsesAuth
-            && ResponseCodes::needsAuth($response->status())
+            && ResponseCode::from($response->status())->needsAuth()
             && $this->tries === 1;
     }
 
     protected function body(): string|array|null
     {
-        if ($this->method === Methods::post) {
+        if ($this->endpoint->method() === Method::POST) {
             return $this->endpoint->body();
         }
 
