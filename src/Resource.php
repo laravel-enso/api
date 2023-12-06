@@ -3,6 +3,7 @@
 namespace LaravelEnso\Api;
 
 use Illuminate\Support\Collection;
+use LaravelEnso\Api\Exceptions\Argument;
 
 abstract class Resource
 {
@@ -10,6 +11,10 @@ abstract class Resource
 
     public function resolve(): array
     {
+        if ($this->needsValidation()) {
+            $this->validate();
+        }
+
         $value = fn ($argument) => $argument instanceof self
             ? $argument->resolve()
             : $argument;
@@ -27,5 +32,24 @@ abstract class Resource
     public function toJson(): string
     {
         return json_encode($this->toArray());
+    }
+
+    protected function mandatoryAttributes(): array
+    {
+        return [];
+    }
+
+    private function validate()
+    {
+        $missing = array_diff($this->mandatoryAttributes(), array_keys($this->toArray()));
+
+        if (count($missing) > 0) {
+            throw Argument::mandatory($missing);
+        }
+    }
+
+    private function needsValidation(): bool
+    {
+        return count($this->mandatoryAttributes()) > 0;
     }
 }
