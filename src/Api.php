@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use LaravelEnso\Api\Contracts\AsForm;
 use LaravelEnso\Api\Contracts\AttachesFiles;
 use LaravelEnso\Api\Contracts\CustomHeaders;
 use LaravelEnso\Api\Contracts\Endpoint;
@@ -67,6 +68,10 @@ class Api
 
         if ($this->endpoint instanceof Timeout) {
             $http->timeout($this->endpoint->timeout());
+        }
+
+        if ($this->endpoint instanceof AsForm) {
+            $http->asForm();
         }
 
         return $http->withOptions(['debug' => Config::get('enso.api.debug')])
