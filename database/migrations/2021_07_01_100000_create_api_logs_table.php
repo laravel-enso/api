@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('try')->nullable();
             $table->tinyInteger('type')->index();
 
-            $table->unsignedDecimal('duration', 5, 2);
+            $table->decimal('duration', 5, 2)->unsigned();
 
             $table->timestamps();
 
