@@ -3,7 +3,7 @@
 namespace LaravelEnso\Api\Http\Middleware;
 
 use Closure;
-use LaravelEnso\Api\Enums\Calls;
+use LaravelEnso\Api\Enums\Call;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Helpers\Services\Decimals;
@@ -23,7 +23,7 @@ class ApiLogger
             'route' => $request->route()->getName(),
             'method' => $request->method(),
             'status' => $response->status(),
-            'type' => Calls::Inbound,
+            'type' => Call::Inbound->value,
             'duration' => Decimals::sub(microtime(true), LARAVEL_START),
         ]);
 

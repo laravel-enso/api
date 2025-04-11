@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use LaravelEnso\Api\Contracts\Endpoint;
-use LaravelEnso\Api\Enums\Calls;
+use LaravelEnso\Api\Enums\Call;
 use LaravelEnso\Api\Exceptions\Api as Exception;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
@@ -62,13 +62,13 @@ abstract class Action
     private function log(Response $response, string $duration): void
     {
         Log::create([
-            'user_id'  => Auth::user()?->id,
-            'url'      => $this->endpoint()->url(),
-            'route'    => Route::currentRouteName(),
-            'method'   => $this->endpoint()->method(),
-            'status'   => $response->status(),
-            'try'      => $this->api->tries(),
-            'type'     => Calls::Outbound,
+            'user_id' => Auth::user()?->id,
+            'url' => $this->endpoint()->url(),
+            'route' => Route::currentRouteName(),
+            'method' => $this->endpoint()->method(),
+            'status' => $response->status(),
+            'try' => $this->api->tries(),
+            'type' => Call::Outbound->value,
             'duration' => $duration,
         ]);
     }

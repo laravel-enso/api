@@ -2,9 +2,11 @@
 
 namespace LaravelEnso\Api\Contracts;
 
+use LaravelEnso\Api\Enums\Authorization;
+
 interface Token
 {
-    public function type(): string;
+    public function type(): Authorization;
 
     public function auth(): self;
 
