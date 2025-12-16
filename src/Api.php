@@ -15,6 +15,7 @@ use LaravelEnso\Api\Contracts\QueryParameters;
 use LaravelEnso\Api\Contracts\Retry;
 use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\UsesAuth;
+use LaravelEnso\Api\Contracts\UsesBasicAuth;
 use LaravelEnso\Api\Enums\Authorization;
 use LaravelEnso\Api\Enums\Methods;
 use LaravelEnso\Api\Enums\ResponseCodes;
@@ -72,6 +73,9 @@ class Api
 
         if ($this->endpoint instanceof AsForm) {
             $http->asForm();
+        }
+        if ($this->endpoint instanceof UsesBasicAuth) {
+            $http->withBasicAuth($this->endpoint->username(), $this->endpoint->password());
         }
 
         return $http->withOptions(['debug' => Config::get('enso.api.debug')])
