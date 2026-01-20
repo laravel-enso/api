@@ -62,12 +62,15 @@ abstract class Action
 
     private function log(Response $response, string $duration): void
     {
-        $queryParameters = ($this->endpoint() instanceof QueryParameters)
-                            ? $this->endpoint()->parameters() : [];
-        $payload = collect([
+        $queryParameters = $this->endpoint() instanceof QueryParameters
+            ? $this->endpoint()->parameters()
+            : [];
+
+        $payload = [
             'queryParameters' => $queryParameters,
-            'postBody' => $this->endpoint()->body(),
-            ]);
+            'body' => $this->endpoint()->body(),
+        ];
+
         Log::create([
             'user_id' => Auth::user()?->id,
             'url' => $this->endpoint()->url(),
@@ -77,7 +80,7 @@ abstract class Action
             'try' => $this->api->tries(),
             'type' => Calls::Outbound,
             'duration' => $duration,
-            'payload' => $payload->toJson(),
+            'payload' => $payload,
         ]);
     }
 
