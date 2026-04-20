@@ -1,11 +1,11 @@
 {
     "name": "laravel-enso/api",
-    "description": "External API boilerplate for Laravel Enso",
+    "description": "External service integrations and API logging for Laravel Enso",
     "keywords": [
         "laravel-enso",
         "api"
     ],
-    "homepage": "https://git.xtelecom.ro/laravel-enso/api",
+    "homepage": "https://github.com/laravel-enso/api",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -23,9 +23,17 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
+        "laravel-enso/core": "^12.0",
         "laravel-enso/enums": "^3.0",
-        "laravel-enso/helpers": "^4.0"
+        "laravel-enso/helpers": "^4.0",
+        "laravel-enso/localisation": "^5.0",
+        "laravel-enso/permissions": "^5.0",
+        "laravel-enso/rememberable": "^4.0",
+        "laravel-enso/tables": "^5.0",
+        "laravel-enso/upgrade": "^2.0",
+        "laravel-enso/users": "^2.0",
+        "laravel/framework": "^12.0|^13.0"
     },
     "autoload": {
         "psr-4": {
