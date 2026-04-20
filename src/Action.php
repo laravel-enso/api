@@ -20,8 +20,7 @@ abstract class Action
     private Api $api;
     private bool $handledFailure = false;
 
-    //TODO add return type: Response
-    public function handle()
+    public function handle(): Response
     {
         if (! $this->apiEnabled()) {
             throw Exception::disabled($this);
