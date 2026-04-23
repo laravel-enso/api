@@ -14,6 +14,7 @@ class ApiLoggerMiddlewareTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+    private string $domain = 'api-logger.test';
 
     protected function setUp(): void
     {
@@ -23,18 +24,22 @@ class ApiLoggerMiddlewareTest extends TestCase
         $this->user = User::first();
 
         Route::middleware('api-action-logger')
+            ->domain($this->domain)
             ->get('/__api/logger/ok', fn () => response('ok', 200))
             ->name('api.logger.ok');
 
         Route::middleware('api-action-logger')
+            ->domain($this->domain)
             ->post('/__api/logger/created', fn () => response('created', 201))
             ->name('api.logger.created');
 
         Route::middleware('api-action-logger')
+            ->domain($this->domain)
             ->delete('/__api/logger/no-content', fn () => response('', 204))
             ->name('api.logger.no-content');
 
         Route::middleware('api-action-logger')
+            ->domain($this->domain)
             ->get('/__api/logger/redirect', fn () => redirect('/__redirect/target'))
             ->name('api.logger.redirect');
 
@@ -46,7 +51,7 @@ class ApiLoggerMiddlewareTest extends TestCase
     public function logs_inbound_request_fields(): void
     {
         $this->actingAs($this->user)
-            ->get(route('api.logger.ok', absolute: false))
+            ->get(route('api.logger.ok'))
             ->assertOk();
 
         $log = Log::latest()->first();
@@ -64,9 +69,9 @@ class ApiLoggerMiddlewareTest extends TestCase
     {
         Notification::fake();
 
-        $this->actingAs($this->user)->get(route('api.logger.ok', absolute: false))->assertOk();
-        $this->actingAs($this->user)->post(route('api.logger.created', absolute: false))->assertCreated();
-        $this->actingAs($this->user)->delete(route('api.logger.no-content', absolute: false))->assertNoContent();
+        $this->actingAs($this->user)->get(route('api.logger.ok'))->assertOk();
+        $this->actingAs($this->user)->post(route('api.logger.created'))->assertCreated();
+        $this->actingAs($this->user)->delete(route('api.logger.no-content'))->assertNoContent();
 
         $this->assertDatabaseCount('api_logs', 3);
         Notification::assertNothingSent();
@@ -80,7 +85,7 @@ class ApiLoggerMiddlewareTest extends TestCase
         $admins = User::active()->admins()->get();
 
         $this->actingAs($this->user)
-            ->get(route('api.logger.redirect', absolute: false))
+            ->get(route('api.logger.redirect'))
             ->assertRedirect('/__redirect/target');
 
         $log = Log::latest()->first();
