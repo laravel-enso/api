@@ -53,11 +53,11 @@ abstract class ApiFixtureEndpoint implements Endpoint
     public function __construct(
         protected string $url = 'https://api.test/resource',
         protected string|array $body = [],
-        protected string $method = Methods::get,
+        protected Methods $method = Methods::GET,
     ) {
     }
 
-    public function method(): string
+    public function method(): Methods
     {
         return $this->method;
     }
@@ -79,7 +79,7 @@ class ApiFixtureQueryEndpoint extends ApiFixtureEndpoint implements QueryParamet
         string $url = 'https://api.test/search',
         string|array $body = [],
         private array $parameters = [],
-        string $method = Methods::get,
+        Methods $method = Methods::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -97,7 +97,7 @@ class ApiFixtureRetryEndpoint extends ApiFixtureEndpoint implements Retry
         string|array $body = [],
         private int $retryTries = 2,
         private int $retryDelay = 1,
-        string $method = Methods::get,
+        Methods $method = Methods::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -121,7 +121,7 @@ class ApiFixtureAuthRetryEndpoint extends ApiFixtureEndpoint implements UsesAuth
         string|array $body = [],
         private int $retryTries = 2,
         private int $retryDelay = 0,
-        string $method = Methods::get,
+        Methods $method = Methods::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -147,7 +147,7 @@ class ApiFixtureConfiguredEndpoint extends ApiFixtureEndpoint implements UsesBas
     public function __construct(
         string $url = 'https://api.test/forms',
         string|array $body = ['name' => 'enso'],
-        string $method = Methods::post,
+        Methods $method = Methods::POST,
         private array $headers = ['X-Test-Header' => 'api'],
         private string $username = 'john',
         private string $password = 'secret',

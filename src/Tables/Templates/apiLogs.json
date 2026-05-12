@@ -1,0 +1,97 @@
+{
+    "name": "API Logs",
+    "routePrefix": "system.apiLogs",
+    "crtNo": true,
+    "defaultSort": "api_logs.created_at",
+    "defaultSortDirection": "desc",
+    "buttons": [
+        "excel"
+    ],
+    "columns": [
+        {
+            "label": "User",
+            "name": "user",
+            "data": "user",
+            "resource": "LaravelEnso\\Users\\Http\\Resources\\User",
+            "meta": [
+                "slot",
+                "notExportable"
+            ]
+        },
+        {
+            "label": "Direction",
+            "name": "direction",
+            "data": "api_logs.direction",
+            "enum": "LaravelEnso\\Api\\Enums\\Direction",
+            "meta": [
+                "slot",
+                "sortable"
+            ]
+        },
+        {
+            "label": "Method",
+            "name": "method",
+            "data": "api_logs.method",
+            "enum": "LaravelEnso\\Api\\Enums\\Methods",
+            "meta": [
+                "slot",
+                "sortable"
+            ]
+        },
+        {
+            "label": "Permission",
+            "name": "permission",
+            "data": "permission",
+            "resource": "LaravelEnso\\Permissions\\Http\\Resources\\Permission",
+            "meta": [
+                "slot",
+                "notExportable"
+            ]
+        },
+        {
+            "label": "URL",
+            "name": "url",
+            "data": "api_logs.url",
+            "meta": [
+                "searchable",
+                "sortable"
+            ]
+        },
+        {
+            "label": "Status",
+            "name": "status",
+            "data": "api_logs.status",
+            "meta": [
+                "sortable"
+            ]
+        },
+        {
+            "label": "Try",
+            "name": "try",
+            "data": "api_logs.try",
+            "meta": [
+                "sortable"
+            ]
+        },
+        {
+            "label": "Duration",
+            "name": "duration",
+            "data": "api_logs.duration",
+            "number": {
+                "precision": 2
+            },
+            "meta": [
+                "sortable"
+            ]
+        },
+        {
+            "label": "Created at",
+            "name": "created_at",
+            "data": "api_logs.created_at",
+            "meta": [
+                "datetime",
+                "sortable"
+            ]
+        }
+    ]
+}

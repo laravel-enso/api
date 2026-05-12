@@ -3,7 +3,8 @@
 namespace LaravelEnso\Api\Http\Middleware;
 
 use Closure;
-use LaravelEnso\Api\Enums\Calls;
+use LaravelEnso\Api\Enums\Direction;
+use LaravelEnso\Api\Enums\Methods;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Helpers\Services\Decimals;
@@ -23,13 +24,13 @@ class ApiLogger
             'user_id' => $request->user()?->id,
             'url' => $request->url(),
             'route' => $request->route()->getName(),
-            'method' => $request->method(),
+            'method' => Methods::fromRequest($request),
             'status' => $response->status(),
-            'type' => Calls::Inbound,
+            'direction' => Direction::Inbound,
             'duration' => Decimals::sub(microtime(true), LARAVEL_START),
         ]);
 
-        if (! in_array($response->status(), self::SuccessfulStatuses, true)) {
+        if (!in_array($response->status(), self::SuccessfulStatuses, true)) {
             $this->report($request, $response);
         }
     }

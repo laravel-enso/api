@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
-use LaravelEnso\Api\Enums\Calls;
+use LaravelEnso\Api\Enums\Direction;
 use LaravelEnso\Api\Exceptions\Api as Exception;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
@@ -22,7 +22,7 @@ abstract class Action
 
     public function handle(): Response
     {
-        if (! $this->apiEnabled()) {
+        if (!$this->apiEnabled()) {
             throw Exception::disabled($this);
         }
 
@@ -44,7 +44,7 @@ abstract class Action
 
             return $response->throw();
         } catch (Throwable $exception) {
-            if (! $this->handledFailure) {
+            if (!$this->handledFailure) {
                 (new Handler(...$this->args($exception)))->report();
             }
 
@@ -77,7 +77,7 @@ abstract class Action
             'method' => $this->endpoint()->method(),
             'status' => $response->status(),
             'try' => $this->api->tries(),
-            'type' => Calls::Outbound,
+            'direction' => Direction::Outbound,
             'duration' => $duration,
             'payload' => $payload,
         ]);

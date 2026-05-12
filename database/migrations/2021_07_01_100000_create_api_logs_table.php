@@ -16,17 +16,20 @@ return new class extends Migration {
             $table->string('route')->nullable();
             $table->string('url');
             $table->json('payload')->nullable();
-            $table->string('method');
+            $table->unsignedTinyInteger('method')->index();
 
             $table->integer('status')->index();
             $table->integer('try')->nullable();
-            $table->tinyInteger('type')->index();
+            $table->unsignedTinyInteger('direction')->index();
 
             $table->decimal('duration', 5, 2)->unsigned();
 
             $table->timestamps();
 
             $table->index('created_at');
+            $table->index(['user_id', 'created_at']);
+            $table->index(['method', 'created_at']);
+            $table->index(['direction', 'created_at']);
         });
     }
 

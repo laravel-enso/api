@@ -23,7 +23,7 @@ use LaravelEnso\Api\Enums\ResponseCodes;
 class Api
 {
     protected int $tries;
-    protected string $method;
+    protected Methods $method;
 
     public function __construct(protected Endpoint $endpoint)
     {
@@ -79,7 +79,7 @@ class Api
         }
 
         return $http->withOptions(['debug' => Config::get('enso.api.debug')])
-            ->{$this->method}($this->url(), $this->body());
+            ->{$this->method->clientMethod()}($this->url(), $this->body());
     }
 
     protected function headers(): array
@@ -114,7 +114,7 @@ class Api
 
     protected function body(): string|array|null
     {
-        if ($this->method === Methods::post) {
+        if ($this->method === Methods::POST) {
             return $this->endpoint->body();
         }
 

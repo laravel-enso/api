@@ -54,8 +54,9 @@ API_DEBUG=true
   - custom timeouts
   - retry policies
 - Refreshes an expiring auth token once automatically when an authenticated endpoint receives `401` or `403` on the first try.
-- Logs outbound calls in `api_logs`, including URL, route, HTTP method, status, attempt number, payload, type, and duration.
+- Logs outbound calls in `api_logs`, including URL, route, HTTP method, status, attempt number, payload, direction, and duration.
 - Logs inbound calls through the `ApiLogger` middleware and reports non-`200` responses to administrators.
+- Provides a read-only `System > API Logs` table, with filters for user, permission, method, direction, and creation datetime.
 - Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue.
 - Provides `Resource` and `Filter` base classes for payload shaping and input validation.
 - Includes a `Throttle` helper for debouncing repeated external API calls.
@@ -79,9 +80,9 @@ class FetchOffers implements Endpoint
 {
     private array $filters = [];
 
-    public function method(): string
+    public function method(): Methods
     {
-        return Methods::get;
+        return Methods::GET;
     }
 
     public function url(): string
@@ -255,7 +256,7 @@ Stored attributes:
 - `method`
 - `status`
 - `try`
-- `type`
+- `direction`
 - `duration`
 - `created_at`
 - `updated_at`
@@ -266,11 +267,49 @@ Relationships and casts:
   Belongs to `LaravelEnso\Users\Models\User`
 - `payload`
   Cast to array
+- `method`
+  Cast to `LaravelEnso\Api\Enums\Methods`
+- `direction`
+  Cast to `LaravelEnso\Api\Enums\Direction`
 
-Logging types:
+Logging directions:
 
-- `Calls::Inbound`
-- `Calls::Outbound`
+- `Direction::Inbound`
+- `Direction::Outbound`
+
+### API Logs table
+
+The package provides the `System > API Logs` table through:
+
+- `GET /api/system/apiLogs/initTable`
+- `GET /api/system/apiLogs/tableData`
+- `GET /api/system/apiLogs/exportExcel`
+
+Permissions:
+
+- `system.apiLogs.index`
+- `system.apiLogs.initTable`
+- `system.apiLogs.tableData`
+- `system.apiLogs.exportExcel`
+
+The table defaults to `api_logs.created_at desc`, exposes `created_at` as a `datetime` column, displays resolved users and permissions, and supports filters for user, permission, method, direction, and creation datetime.
+
+### Upgrade notes
+
+This release changes the public logging enum contract:
+
+- replace `LaravelEnso\Api\Enums\Calls` with `LaravelEnso\Api\Enums\Direction`
+- replace `Calls::Inbound` / `Calls::Outbound` with `Direction::Inbound` / `Direction::Outbound`
+- replace `Methods::get`, `Methods::post`, `Methods::put`, and `Methods::delete` with `Methods::GET`, `Methods::POST`, `Methods::PUT`, and `Methods::DELETE`
+- update endpoint signatures from `method(): string` to `method(): Methods`
+- update application code or reporting queries that reference `api_logs.type` to use `api_logs.direction`
+
+After updating the package, run:
+
+```bash
+composer update laravel-enso/api
+php artisan enso:upgrade
+```
 
 ### Resource, filter, and throttle helpers
 
@@ -299,6 +338,8 @@ Required Enso packages:
 - [`laravel-enso/enums`](https://docs.laravel-enso.com/backend/enums.html) [↗](https://github.com/laravel-enso/enums)
 - [`laravel-enso/helpers`](https://docs.laravel-enso.com/backend/helpers.html) [↗](https://github.com/laravel-enso/helpers)
 - [`laravel-enso/localisation`](https://docs.laravel-enso.com/backend/localisation.html) [↗](https://github.com/laravel-enso/localisation)
+- [`laravel-enso/menus`](https://docs.laravel-enso.com/backend/menus.html) [↗](https://github.com/laravel-enso/menus)
+- [`laravel-enso/migrator`](https://docs.laravel-enso.com/backend/migrator.html) [↗](https://github.com/laravel-enso/migrator)
 - [`laravel-enso/permissions`](https://docs.laravel-enso.com/backend/permissions.html) [↗](https://github.com/laravel-enso/permissions)
 - [`laravel-enso/rememberable`](https://docs.laravel-enso.com/backend/rememberable.html) [↗](https://github.com/laravel-enso/rememberable)
 - [`laravel-enso/tables`](https://docs.laravel-enso.com/backend/tables.html) [↗](https://github.com/laravel-enso/tables)

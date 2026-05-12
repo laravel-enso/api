@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
+use LaravelEnso\Api\Enums\Direction;
+use LaravelEnso\Api\Enums\Methods;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Api\Notifications\ApiCallError;
 use LaravelEnso\Users\Models\User;
@@ -60,8 +62,11 @@ class ApiLoggerMiddlewareTest extends TestCase
         $this->assertSame($this->user->id, $log->user_id);
         $this->assertSame('api.logger.ok', $log->route);
         $this->assertSame('/__api/logger/ok', parse_url($log->url, PHP_URL_PATH));
-        $this->assertSame('GET', $log->method);
+        $this->assertSame(Methods::GET, $log->method);
+        $this->assertSame(Methods::GET->value, $log->getRawOriginal('method'));
         $this->assertSame(200, $log->status);
+        $this->assertSame(Direction::Inbound, $log->direction);
+        $this->assertSame(Direction::Inbound->value, $log->getRawOriginal('direction'));
     }
 
     #[Test]
