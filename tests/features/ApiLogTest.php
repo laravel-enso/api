@@ -50,7 +50,7 @@ class ApiLogTest extends TestCase
     #[Test]
     public function filters_api_logs_by_user(): void
     {
-        $other = User::whereKeyNot($this->user->id)->firstOrFail();
+        $other = User::factory()->create();
 
         $this->log(['user_id' => $this->user->id, 'url' => 'https://api.test/user']);
         $this->log(['user_id' => $other->id, 'url' => 'https://api.test/other']);
