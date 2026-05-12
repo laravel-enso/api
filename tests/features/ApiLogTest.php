@@ -3,7 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LaravelEnso\Api\Enums\Direction;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Menus\Models\Menu;
 use LaravelEnso\Permissions\Models\Permission;
@@ -95,14 +95,14 @@ class ApiLogTest extends TestCase
     public function filters_api_logs_by_method_direction_and_created_at_interval(): void
     {
         $this->log([
-            'method' => Methods::POST,
+            'method' => Method::POST,
             'direction' => Direction::Outbound,
             'url' => 'https://api.test/current',
             'created_at' => Carbon::parse('2026-05-12 10:00:00'),
         ]);
 
         $this->log([
-            'method' => Methods::GET,
+            'method' => Method::GET,
             'direction' => Direction::Inbound,
             'url' => 'https://api.test/old',
             'created_at' => Carbon::parse('2026-05-10 10:00:00'),
@@ -111,7 +111,7 @@ class ApiLogTest extends TestCase
         $params = $this->tableParams([
             'filters' => [
                 'api_logs' => [
-                    'method' => Methods::POST->value,
+                    'method' => Method::POST->value,
                     'direction' => Direction::Outbound->value,
                 ],
             ],
@@ -152,7 +152,7 @@ class ApiLogTest extends TestCase
             'user_id' => $this->user->id,
             'route' => null,
             'url' => 'https://api.test/log',
-            'method' => Methods::GET,
+            'method' => Method::GET,
             'status' => 200,
             'try' => 1,
             'direction' => Direction::Inbound,

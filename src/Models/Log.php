@@ -5,7 +5,7 @@ namespace LaravelEnso\Api\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LaravelEnso\Api\Enums\Direction;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Permissions\Models\Permission;
 use LaravelEnso\Rememberable\Traits\Rememberable;
 use LaravelEnso\Tables\Traits\TableCache;
@@ -34,7 +34,7 @@ class Log extends Model
     {
         return [
             'direction' => Direction::class,
-            'method' => Methods::class,
+            'method' => Method::class,
             'payload' => 'array',
         ];
     }

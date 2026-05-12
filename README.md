@@ -74,15 +74,15 @@ Define a small endpoint class that describes the request:
 
 ```php
 use LaravelEnso\Api\Contracts\Endpoint;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 
 class FetchOffers implements Endpoint
 {
     private array $filters = [];
 
-    public function method(): Methods
+    public function method(): Method
     {
-        return Methods::GET;
+        return Method::GET;
     }
 
     public function url(): string
@@ -268,7 +268,7 @@ Relationships and casts:
 - `payload`
   Cast to array
 - `method`
-  Cast to `LaravelEnso\Api\Enums\Methods`
+  Cast to `LaravelEnso\Api\Enums\Method`
 - `direction`
   Cast to `LaravelEnso\Api\Enums\Direction`
 
@@ -300,9 +300,11 @@ This release changes the public logging enum contract:
 
 - replace `LaravelEnso\Api\Enums\Calls` with `LaravelEnso\Api\Enums\Direction`
 - replace `Calls::Inbound` / `Calls::Outbound` with `Direction::Inbound` / `Direction::Outbound`
-- replace `Methods::get`, `Methods::post`, `Methods::put`, and `Methods::delete` with `Methods::GET`, `Methods::POST`, `Methods::PUT`, and `Methods::DELETE`
-- update endpoint signatures from `method(): string` to `method(): Methods`
+- replace `LaravelEnso\Api\Enums\Methods` with `LaravelEnso\Api\Enums\Method`
+- replace `Method::get`, `Method::post`, `Method::put`, and `Method::delete` with `Method::GET`, `Method::POST`, `Method::PUT`, and `Method::DELETE`
+- update endpoint signatures from `method(): string` to `method(): Method`
 - update application code or reporting queries that reference `api_logs.type` to use `api_logs.direction`
+- update frontend API log filters from `apiLogMethods` to `apiLogMethod`
 
 After updating the package, run:
 

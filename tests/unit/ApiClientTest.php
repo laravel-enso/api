@@ -7,7 +7,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use LaravelEnso\Api\Api;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureAuthRetryEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureConfiguredEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureQueryEndpoint;
@@ -31,7 +31,7 @@ class ApiClientTest extends TestCase
     public function refreshes_bearer_token_once_on_first_auth_failure(): void
     {
         $tokenProvider = new ApiFixtureTokenProvider();
-        $endpoint = new ApiFixtureAuthRetryEndpoint($tokenProvider, body: ['query' => 'offers'], method: Methods::POST);
+        $endpoint = new ApiFixtureAuthRetryEndpoint($tokenProvider, body: ['query' => 'offers'], method: Method::POST);
         $attempts = 0;
 
         Http::fake(function ($request) use (&$attempts) {
@@ -164,7 +164,7 @@ class ApiClientTest extends TestCase
     #[Test]
     public function returns_null_body_for_non_post_empty_payloads(): void
     {
-        $api = new Api(new ApiFixtureQueryEndpoint(body: [], method: Methods::GET));
+        $api = new Api(new ApiFixtureQueryEndpoint(body: [], method: Method::GET));
 
         $body = new \ReflectionMethod(Api::class, 'body');
         $body->setAccessible(true);

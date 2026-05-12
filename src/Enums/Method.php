@@ -8,7 +8,7 @@ use LaravelEnso\Enums\Contracts\Mappable;
 use LaravelEnso\Enums\Contracts\Select;
 use LaravelEnso\Enums\Traits\Select as Options;
 
-enum Methods: int implements Frontend, Mappable, Select
+enum Method: int implements Frontend, Mappable, Select
 {
     use Options;
 
@@ -45,6 +45,6 @@ enum Methods: int implements Frontend, Mappable, Select
 
     public static function registerBy(): string
     {
-        return 'apiLogMethods';
+        return 'apiLogMethod';
     }
 }

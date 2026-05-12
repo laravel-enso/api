@@ -16,7 +16,7 @@ use LaravelEnso\Api\Contracts\Token;
 use LaravelEnso\Api\Contracts\UsesAuth;
 use LaravelEnso\Api\Contracts\UsesBasicAuth;
 use LaravelEnso\Api\Enums\Authorization;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Resource;
 
 class ApiFixtureTokenProvider implements Token
@@ -53,11 +53,11 @@ abstract class ApiFixtureEndpoint implements Endpoint
     public function __construct(
         protected string $url = 'https://api.test/resource',
         protected string|array $body = [],
-        protected Methods $method = Methods::GET,
+        protected Method $method = Method::GET,
     ) {
     }
 
-    public function method(): Methods
+    public function method(): Method
     {
         return $this->method;
     }
@@ -79,7 +79,7 @@ class ApiFixtureQueryEndpoint extends ApiFixtureEndpoint implements QueryParamet
         string $url = 'https://api.test/search',
         string|array $body = [],
         private array $parameters = [],
-        Methods $method = Methods::GET,
+        Method $method = Method::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -97,7 +97,7 @@ class ApiFixtureRetryEndpoint extends ApiFixtureEndpoint implements Retry
         string|array $body = [],
         private int $retryTries = 2,
         private int $retryDelay = 1,
-        Methods $method = Methods::GET,
+        Method $method = Method::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -121,7 +121,7 @@ class ApiFixtureAuthRetryEndpoint extends ApiFixtureEndpoint implements UsesAuth
         string|array $body = [],
         private int $retryTries = 2,
         private int $retryDelay = 0,
-        Methods $method = Methods::GET,
+        Method $method = Method::GET,
     ) {
         parent::__construct($url, $body, $method);
     }
@@ -147,7 +147,7 @@ class ApiFixtureConfiguredEndpoint extends ApiFixtureEndpoint implements UsesBas
     public function __construct(
         string $url = 'https://api.test/forms',
         string|array $body = ['name' => 'enso'],
-        Methods $method = Methods::POST,
+        Method $method = Method::POST,
         private array $headers = ['X-Test-Header' => 'api'],
         private string $username = 'john',
         private string $password = 'secret',

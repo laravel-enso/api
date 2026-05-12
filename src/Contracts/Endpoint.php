@@ -2,11 +2,11 @@
 
 namespace LaravelEnso\Api\Contracts;
 
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 
 interface Endpoint
 {
-    public function method(): Methods;
+    public function method(): Method;
 
     public function url(): string;
 

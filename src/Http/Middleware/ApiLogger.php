@@ -4,7 +4,7 @@ namespace LaravelEnso\Api\Http\Middleware;
 
 use Closure;
 use LaravelEnso\Api\Enums\Direction;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Helpers\Services\Decimals;
@@ -24,7 +24,7 @@ class ApiLogger
             'user_id' => $request->user()?->id,
             'url' => $request->url(),
             'route' => $request->route()->getName(),
-            'method' => Methods::fromRequest($request),
+            'method' => Method::fromRequest($request),
             'status' => $response->status(),
             'direction' => Direction::Inbound,
             'duration' => Decimals::sub(microtime(true), LARAVEL_START),

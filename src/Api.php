@@ -17,13 +17,13 @@ use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\UsesAuth;
 use LaravelEnso\Api\Contracts\UsesBasicAuth;
 use LaravelEnso\Api\Enums\Authorization;
-use LaravelEnso\Api\Enums\Methods;
+use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Enums\ResponseCodes;
 
 class Api
 {
     protected int $tries;
-    protected Methods $method;
+    protected Method $method;
 
     public function __construct(protected Endpoint $endpoint)
     {
@@ -114,7 +114,7 @@ class Api
 
     protected function body(): string|array|null
     {
-        if ($this->method === Methods::POST) {
+        if ($this->method === Method::POST) {
             return $this->endpoint->body();
         }
 
