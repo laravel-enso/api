@@ -12,6 +12,10 @@ use LaravelEnso\Api\Tests\Fixtures\ApiFixtureAuthRetryEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureConfiguredEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureQueryEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureRetryEndpoint;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureRetrySoapEndpoint;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapApi;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapClient;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureTokenProvider;
 use LaravelEnso\Api\Tests\Support\ApiSleepRecorder;
 use PHPUnit\Framework\Attributes\Test;
@@ -170,5 +174,39 @@ class ApiClientTest extends TestCase
         $body->setAccessible(true);
 
         $this->assertNull($body->invoke($api));
+    }
+
+    #[Test]
+    public function calls_soap_endpoint_operations(): void
+    {
+        $endpoint = new ApiFixtureSoapEndpoint(
+            operation: 'SubmitInvoice',
+            arguments: [['number' => 'INV-1']],
+        );
+        $client = new ApiFixtureSoapClient([['accepted' => true]]);
+
+        $response = (new ApiFixtureSoapApi($endpoint, $client))->call();
+
+        $this->assertTrue($response->successful());
+        $this->assertSame(['accepted' => true], $response->body());
+        $this->assertSame('SubmitInvoice', $client->calls[0]['name']);
+        $this->assertSame([['number' => 'INV-1']], $client->calls[0]['args']);
+    }
+
+    #[Test]
+    public function retries_soap_faults_according_to_retry_contract(): void
+    {
+        $endpoint = new ApiFixtureRetrySoapEndpoint(retryDelay: 2);
+        $client = new ApiFixtureSoapClient([
+            new \SoapFault('Server', 'Temporary failure'),
+            ['accepted' => true],
+        ]);
+
+        $api = new ApiFixtureSoapApi($endpoint, $client);
+        $response = $api->call();
+
+        $this->assertTrue($response->successful());
+        $this->assertSame(2, $api->tries());
+        $this->assertSame([2], ApiSleepRecorder::$calls);
     }
 }

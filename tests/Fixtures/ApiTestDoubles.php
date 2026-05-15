@@ -11,6 +11,7 @@ use LaravelEnso\Api\Contracts\CustomHeaders;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
 use LaravelEnso\Api\Contracts\Retry;
+use LaravelEnso\Api\Contracts\SoapEndpoint;
 use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\Token;
 use LaravelEnso\Api\Contracts\UsesAuth;
@@ -18,6 +19,9 @@ use LaravelEnso\Api\Contracts\UsesBasicAuth;
 use LaravelEnso\Api\Enums\Authorization;
 use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Resource;
+use LaravelEnso\Api\SoapApi;
+use SoapClient;
+use SoapFault;
 
 class ApiFixtureTokenProvider implements Token
 {
@@ -198,6 +202,112 @@ class ApiFixtureAction extends Action
     protected function endpoint(): Endpoint
     {
         return $this->configuredEndpoint;
+    }
+}
+
+class ApiFixtureSoapEndpoint implements SoapEndpoint
+{
+    public function __construct(
+        private ?string $wsdl = 'https://soap.test/service.wsdl',
+        private string $operation = 'Submit',
+        private array $arguments = [['id' => 1]],
+        private array $options = ['trace' => true],
+    ) {
+    }
+
+    public function wsdl(): ?string
+    {
+        return $this->wsdl;
+    }
+
+    public function operation(): string
+    {
+        return $this->operation;
+    }
+
+    public function arguments(): array
+    {
+        return $this->arguments;
+    }
+
+    public function options(): array
+    {
+        return $this->options;
+    }
+}
+
+class ApiFixtureRetrySoapEndpoint extends ApiFixtureSoapEndpoint implements Retry
+{
+    public function __construct(
+        ?string $wsdl = 'https://soap.test/service.wsdl',
+        string $operation = 'Submit',
+        array $arguments = [['id' => 1]],
+        array $options = ['trace' => true],
+        private int $retryTries = 2,
+        private int $retryDelay = 1,
+    ) {
+        parent::__construct($wsdl, $operation, $arguments, $options);
+    }
+
+    public function delay(): int
+    {
+        return $this->retryDelay;
+    }
+
+    public function tries(): int
+    {
+        return $this->retryTries;
+    }
+}
+
+class ApiFixtureSoapAction extends Action
+{
+    public function __construct(private SoapEndpoint $configuredEndpoint)
+    {
+    }
+
+    protected function endpoint(): SoapEndpoint
+    {
+        return $this->configuredEndpoint;
+    }
+}
+
+class ApiFixtureSoapApi extends SoapApi
+{
+    public function __construct(SoapEndpoint $endpoint, private SoapClient $soapClient)
+    {
+        parent::__construct($endpoint);
+    }
+
+    protected function client(): SoapClient
+    {
+        return $this->soapClient;
+    }
+}
+
+class ApiFixtureSoapClient extends SoapClient
+{
+    public array $calls = [];
+
+    public function __construct(private array $responses)
+    {
+    }
+
+    public function __soapCall(
+        string $name,
+        array $args,
+        ?array $options = null,
+        $inputHeaders = null,
+        &$outputHeaders = null
+    ): mixed {
+        $this->calls[] = compact('name', 'args', 'options', 'inputHeaders');
+        $response = array_shift($this->responses);
+
+        if ($response instanceof SoapFault) {
+            throw $response;
+        }
+
+        return $response;
     }
 }
 
