@@ -6,8 +6,10 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use LaravelEnso\Api\Contracts\Client;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
+use LaravelEnso\Api\Contracts\SoapEndpoint;
 use LaravelEnso\Api\Enums\Direction;
 use LaravelEnso\Api\Exceptions\Api as Exception;
 use LaravelEnso\Api\Exceptions\Handler;
@@ -17,17 +19,18 @@ use Throwable;
 
 abstract class Action
 {
-    private Api $api;
+    private Client $api;
     private bool $handledFailure = false;
 
-    public function handle(): Response
+    public function handle(): Response|SoapResponse
     {
         if (!$this->apiEnabled()) {
             throw Exception::disabled($this);
         }
 
         try {
-            $this->api = App::make(Api::class, ['endpoint' => $this->endpoint()]);
+            $endpoint = $this->endpoint();
+            $this->api = $this->client($endpoint);
 
             $timer = microtime(true);
 
@@ -35,7 +38,7 @@ abstract class Action
 
             $duration = Decimals::sub(microtime(true), $timer);
 
-            $this->log($response, $duration);
+            $this->log($endpoint, $response, $duration);
 
             if ($response->failed()) {
                 (new Handler(...$this->args($response)))->report();
@@ -59,22 +62,33 @@ abstract class Action
 
     abstract protected function endpoint(): Endpoint;
 
-    private function log(Response $response, string $duration): void
+    private function client(Endpoint $endpoint): Client
     {
-        $queryParameters = $this->endpoint() instanceof QueryParameters
-            ? $this->endpoint()->parameters()
+        return $endpoint instanceof SoapEndpoint
+            ? App::make(SoapApi::class, ['endpoint' => $endpoint])
+            : App::make(Api::class, ['endpoint' => $endpoint]);
+    }
+
+    private function log(Endpoint $endpoint, Response|SoapResponse $response, string $duration): void
+    {
+        $queryParameters = $endpoint instanceof QueryParameters
+            ? $endpoint->parameters()
             : [];
 
         $payload = [
             'queryParameters' => $queryParameters,
-            'body' => $this->endpoint()->body(),
+            'body' => $endpoint->body(),
         ];
+
+        if ($endpoint instanceof SoapEndpoint) {
+            $payload['operation'] = $endpoint->operation();
+        }
 
         Log::create([
             'user_id' => Auth::user()?->id,
-            'url' => $this->endpoint()->url(),
+            'url' => $endpoint->url(),
             'route' => Route::currentRouteName(),
-            'method' => $this->endpoint()->method(),
+            'method' => $endpoint->method(),
             'status' => $response->status(),
             'try' => $this->api->tries(),
             'direction' => Direction::Outbound,
@@ -83,15 +97,18 @@ abstract class Action
         ]);
     }
 
-    private function args(Throwable|Response $response): array
+    private function args(Throwable|Response|SoapResponse $response): array
     {
+        $endpoint = $this->endpoint();
         $base = [
-            static::class, $this->endpoint()->url(), $this->endpoint()->body(),
+            static::class, $endpoint->url(), $endpoint->body(),
         ];
 
-        $extra = $response instanceof Response
-            ? [$response->status(), $response->body()]
-            : [$response->getCode(), $response->getMessage()];
+        $extra = match (true) {
+            $response instanceof Response => [$response->status(), $response->body()],
+            $response instanceof SoapResponse => [$response->code(), $response->message()],
+            default => [$response->getCode(), $response->getMessage()],
+        };
 
         return [...$base, ...$extra];
     }

@@ -11,8 +11,14 @@ use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Exceptions\Api as ApiDisabled;
 use LaravelEnso\Api\Models\Log;
 use LaravelEnso\Api\Notifications\ApiCallError;
+use LaravelEnso\Api\SoapApi;
+use LaravelEnso\Api\SoapResponse;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureAction;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureQueryEndpoint;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapAction;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapApi;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapClient;
+use LaravelEnso\Api\Tests\Fixtures\ApiFixtureSoapEndpoint;
 use LaravelEnso\Users\Models\User;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -111,5 +117,61 @@ class ApiActionTest extends TestCase
         $this->expectExceptionMessage('Api API is disabled');
 
         (new ApiFixtureAction(new ApiFixtureQueryEndpoint(), false))->handle();
+    }
+
+    #[Test]
+    public function returns_successful_soap_response_and_logs_outbound_calls(): void
+    {
+        $endpoint = new ApiFixtureSoapEndpoint(
+            operation: 'SubmitInvoice',
+            arguments: [['number' => 'INV-1']],
+        );
+        $client = new ApiFixtureSoapClient([['accepted' => true]]);
+
+        $this->app->bind(SoapApi::class, fn ($app, $params) => new ApiFixtureSoapApi(
+            $params['endpoint'],
+            $client,
+        ));
+
+        $this->actingAs($this->user);
+
+        $response = (new ApiFixtureSoapAction($endpoint))->handle();
+        $log = Log::latest()->first();
+
+        $this->assertInstanceOf(SoapResponse::class, $response);
+        $this->assertTrue($response->successful());
+        $this->assertSame(['accepted' => true], $response->body());
+        $this->assertSame('https://soap.test/service.wsdl', $log->url);
+        $this->assertSame(Method::POST, $log->method);
+        $this->assertSame([['number' => 'INV-1']], $log->payload['body']);
+        $this->assertSame('SubmitInvoice', $log->payload['operation']);
+    }
+
+    #[Test]
+    public function reports_failed_soap_responses_only_once_and_throws_soap_fault(): void
+    {
+        Notification::fake();
+
+        $endpoint = new ApiFixtureSoapEndpoint();
+        $client = new ApiFixtureSoapClient([
+            new \SoapFault('Server', 'Temporary failure'),
+        ]);
+
+        $this->app->bind(SoapApi::class, fn ($app, $params) => new ApiFixtureSoapApi(
+            $params['endpoint'],
+            $client,
+        ));
+
+        try {
+            $this->actingAs($this->user);
+            (new ApiFixtureSoapAction($endpoint))->handle();
+            $this->fail('The action should throw a SoapFault');
+        } catch (\SoapFault) {
+            $admins = User::active()->admins()->get();
+
+            $this->assertDatabaseCount('api_logs', 1);
+            Notification::assertSentTo($admins, ApiCallError::class);
+            Notification::assertCount($admins->count());
+        }
     }
 }
