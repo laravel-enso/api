@@ -16,6 +16,7 @@ use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\Token;
 use LaravelEnso\Api\Contracts\UsesAuth;
 use LaravelEnso\Api\Contracts\UsesBasicAuth;
+use LaravelEnso\Api\Endpoints\Soap;
 use LaravelEnso\Api\Enums\Authorization;
 use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Resource;
@@ -205,7 +206,7 @@ class ApiFixtureAction extends Action
     }
 }
 
-class ApiFixtureSoapEndpoint implements SoapEndpoint
+class ApiFixtureSoapEndpoint extends Soap
 {
     public function __construct(
         private ?string $wsdl = 'https://soap.test/service.wsdl',

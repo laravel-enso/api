@@ -2,13 +2,14 @@
 
 namespace LaravelEnso\Api;
 
+use LaravelEnso\Api\Contracts\Client;
 use LaravelEnso\Api\Contracts\Retry;
 use LaravelEnso\Api\Contracts\SoapEndpoint;
 use LaravelEnso\Api\Contracts\SoapHeaders;
 use SoapClient;
 use SoapFault;
 
-class SoapApi
+class SoapApi implements Client
 {
     protected int $tries;
 

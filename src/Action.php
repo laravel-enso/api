@@ -6,11 +6,11 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use LaravelEnso\Api\Contracts\Client;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
 use LaravelEnso\Api\Contracts\SoapEndpoint;
 use LaravelEnso\Api\Enums\Direction;
-use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Exceptions\Api as Exception;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Models\Log;
@@ -19,7 +19,7 @@ use Throwable;
 
 abstract class Action
 {
-    private Api|SoapApi $api;
+    private Client $api;
     private bool $handledFailure = false;
 
     public function handle(): Response|SoapResponse
@@ -30,9 +30,7 @@ abstract class Action
 
         try {
             $endpoint = $this->endpoint();
-            $this->api = $endpoint instanceof SoapEndpoint
-                ? App::make(SoapApi::class, ['endpoint' => $endpoint])
-                : App::make(Api::class, ['endpoint' => $endpoint]);
+            $this->api = $this->client($endpoint);
 
             $timer = microtime(true);
 
@@ -62,9 +60,16 @@ abstract class Action
         return true;
     }
 
-    abstract protected function endpoint(): Endpoint|SoapEndpoint;
+    abstract protected function endpoint(): Endpoint;
 
-    private function log(Endpoint|SoapEndpoint $endpoint, Response|SoapResponse $response, string $duration): void
+    private function client(Endpoint $endpoint): Client
+    {
+        return $endpoint instanceof SoapEndpoint
+            ? App::make(SoapApi::class, ['endpoint' => $endpoint])
+            : App::make(Api::class, ['endpoint' => $endpoint]);
+    }
+
+    private function log(Endpoint $endpoint, Response|SoapResponse $response, string $duration): void
     {
         $queryParameters = $endpoint instanceof QueryParameters
             ? $endpoint->parameters()
@@ -72,7 +77,7 @@ abstract class Action
 
         $payload = [
             'queryParameters' => $queryParameters,
-            'body' => $this->payload($endpoint),
+            'body' => $endpoint->body(),
         ];
 
         if ($endpoint instanceof SoapEndpoint) {
@@ -81,9 +86,9 @@ abstract class Action
 
         Log::create([
             'user_id' => Auth::user()?->id,
-            'url' => $this->url($endpoint),
+            'url' => $endpoint->url(),
             'route' => Route::currentRouteName(),
-            'method' => $this->method($endpoint),
+            'method' => $endpoint->method(),
             'status' => $response->status(),
             'try' => $this->api->tries(),
             'direction' => Direction::Outbound,
@@ -96,7 +101,7 @@ abstract class Action
     {
         $endpoint = $this->endpoint();
         $base = [
-            static::class, $this->url($endpoint), $this->payload($endpoint),
+            static::class, $endpoint->url(), $endpoint->body(),
         ];
 
         $extra = match (true) {
@@ -106,30 +111,5 @@ abstract class Action
         };
 
         return [...$base, ...$extra];
-    }
-
-    private function url(Endpoint|SoapEndpoint $endpoint): string
-    {
-        if ($endpoint instanceof Endpoint) {
-            return $endpoint->url();
-        }
-
-        return $endpoint->wsdl()
-            ?? $endpoint->options()['location']
-            ?? $endpoint->operation();
-    }
-
-    private function method(Endpoint|SoapEndpoint $endpoint): Method
-    {
-        return $endpoint instanceof Endpoint
-            ? $endpoint->method()
-            : Method::POST;
-    }
-
-    private function payload(Endpoint|SoapEndpoint $endpoint): string|array
-    {
-        return $endpoint instanceof Endpoint
-            ? $endpoint->body()
-            : $endpoint->arguments();
     }
 }

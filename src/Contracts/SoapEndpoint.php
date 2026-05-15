@@ -2,7 +2,7 @@
 
 namespace LaravelEnso\Api\Contracts;
 
-interface SoapEndpoint
+interface SoapEndpoint extends Endpoint
 {
     public function wsdl(): ?string;
 

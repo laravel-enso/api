@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use LaravelEnso\Api\Contracts\AsForm;
 use LaravelEnso\Api\Contracts\AttachesFiles;
+use LaravelEnso\Api\Contracts\Client;
 use LaravelEnso\Api\Contracts\CustomHeaders;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
@@ -20,7 +21,7 @@ use LaravelEnso\Api\Enums\Authorization;
 use LaravelEnso\Api\Enums\Method;
 use LaravelEnso\Api\Enums\ResponseCodes;
 
-class Api
+class Api implements Client
 {
     protected int $tries;
     protected Method $method;
