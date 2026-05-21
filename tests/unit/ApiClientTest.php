@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use LaravelEnso\Api\Api;
 use LaravelEnso\Api\Enums\Method;
+use LaravelEnso\Api\SoapApi;
+use LaravelEnso\Api\SoapResponse;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureAuthRetryEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureConfiguredEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureQueryEndpoint;
