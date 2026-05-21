@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../Fixtures/ApiTestDoubles.php';
+require_once __DIR__.'/../Fixtures/SoapStubs.php';
+require_once __DIR__.'/../Fixtures/ApiTestDoubles.php';
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\RequestException;

@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__.'/../Fixtures/SoapStubs.php';
 require_once __DIR__.'/../Fixtures/ApiTestDoubles.php';
 require_once __DIR__.'/../Support/sleep.php';
 
