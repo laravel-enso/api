@@ -33,21 +33,20 @@ class ApiCallError extends Notification implements ShouldQueue
 
         return (new MailMessage())
             ->subject("[ {$app} ] {$this->subject()}")
-            ->greeting(__('Hi :name,', [
-                'name' => $notifiable->person->appellative(),
-            ]))->line(__('The action :action failed on :url with the following error code: :code', [
+            ->markdown('laravel-enso/api::emails.api-call-error', [
+                'appellative' => $notifiable->person->appellative(),
                 'action' => $this->action,
                 'url' => $this->url,
                 'code' => $this->code,
-            ]))->line(__('Reported error message: :message', [
                 'message' => $this->message,
-            ]))->line(__('Request payload: :payload', [
                 'payload' => json_encode($this->payload),
-            ]))->when(Auth::check(), fn ($message) => $message
-                ->line(__('Triggered by user id: :id ( :email )', [
-                    'id' => Auth::id(),
-                    'email' => Auth::user()->email,
-                ])));
+                'triggeredBy' => Auth::check()
+                    ? [
+                        'id' => Auth::id(),
+                        'email' => Auth::user()->email,
+                    ]
+                    : null,
+            ]);
     }
 
     private function subject(): string

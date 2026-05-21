@@ -29,6 +29,7 @@
         "laravel-enso/helpers": "^4.0",
         "laravel-enso/localisation": "^5.0",
         "laravel-enso/menus": "^5.0",
+        "laravel-enso/mails": "^1.0",
         "laravel-enso/migrator": "^2.0",
         "laravel-enso/permissions": "^5.0",
         "laravel-enso/rememberable": "^4.0",
@@ -45,7 +46,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "LaravelEnso\\Api\\AppServiceProvider"
+                "LaravelEnso\\Api\\AppServiceProvider",
+                "LaravelEnso\\Api\\MailServiceProvider"
             ]
         }
     }

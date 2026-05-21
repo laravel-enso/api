@@ -58,7 +58,7 @@ API_DEBUG=true
 - Logs outbound calls in `api_logs`, including URL, route, HTTP method, status, attempt number, payload, direction, and duration.
 - Logs inbound calls through the `ApiLogger` middleware and reports non-`200` responses to administrators.
 - Provides a read-only `System > API Logs` table, with filters for user, permission, method, direction, and creation datetime.
-- Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue.
+- Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue using shared `laravel-enso/mails` layouts and package-owned previews.
 - Provides `Resource` and `Filter` base classes for payload shaping and input validation.
 - Includes a `Throttle` helper for debouncing repeated external API calls.
 - Ships the `api_logs` migration and an `Api\Models\Log` model with Enso caching traits.
@@ -425,6 +425,7 @@ Required Enso packages:
 - [`laravel-enso/helpers`](https://docs.laravel-enso.com/backend/helpers.html) [↗](https://github.com/laravel-enso/helpers)
 - [`laravel-enso/localisation`](https://docs.laravel-enso.com/backend/localisation.html) [↗](https://github.com/laravel-enso/localisation)
 - [`laravel-enso/menus`](https://docs.laravel-enso.com/backend/menus.html) [↗](https://github.com/laravel-enso/menus)
+- [`laravel-enso/mails`](https://github.com/laravel-enso/mails)
 - [`laravel-enso/migrator`](https://docs.laravel-enso.com/backend/migrator.html) [↗](https://github.com/laravel-enso/migrator)
 - [`laravel-enso/permissions`](https://docs.laravel-enso.com/backend/permissions.html) [↗](https://github.com/laravel-enso/permissions)
 - [`laravel-enso/rememberable`](https://docs.laravel-enso.com/backend/rememberable.html) [↗](https://github.com/laravel-enso/rememberable)
