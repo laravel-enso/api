@@ -47,6 +47,12 @@ class SoapApi implements Client
 
     protected function client(): SoapClient
     {
+        if (! extension_loaded('soap')) {
+            throw new \RuntimeException(
+                'The PHP SOAP extension is required for SOAP API endpoints.'
+            );
+        }
+
         $client = new SoapClient($this->endpoint->wsdl(), $this->endpoint->options());
 
         if ($this->endpoint instanceof SoapHeaders) {

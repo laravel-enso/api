@@ -210,4 +210,27 @@ class ApiClientTest extends TestCase
         $this->assertSame(2, $api->tries());
         $this->assertSame([2], ApiSleepRecorder::$calls);
     }
+
+    #[Test]
+    public function throws_a_clear_exception_when_the_soap_extension_is_missing(): void
+    {
+        if (extension_loaded('soap')) {
+            $this->markTestSkipped('The SOAP extension is installed.');
+        }
+
+        $api = new class(new ApiFixtureSoapEndpoint()) extends SoapApi {
+            public function call(): SoapResponse
+            {
+                return new SoapResponse($this->client()->__soapCall(
+                    $this->endpoint->operation(),
+                    $this->endpoint->arguments(),
+                ));
+            }
+        };
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The PHP SOAP extension is required for SOAP API endpoints.');
+
+        $api->call();
+    }
 }
