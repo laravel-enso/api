@@ -56,9 +56,12 @@ class ApiThrottleNotificationTest extends TestCase
 
         $this->assertStringContainsString(config('app.name'), $mail->subject);
         $this->assertStringContainsString('FetchOffersAction', $mail->subject);
-        $this->assertStringContainsString($admin->person->appellative(), $mail->greeting);
-        $this->assertStringContainsString('Validation failed', implode("\n", $mail->introLines));
-        $this->assertStringContainsString($triggerUser->email, implode("\n", $mail->introLines));
+
+        $html = $mail->render()->toHtml();
+
+        $this->assertStringContainsString($admin->person->appellative(), $html);
+        $this->assertStringContainsString('Validation failed', $html);
+        $this->assertStringContainsString($triggerUser->email, $html);
     }
 
     #[Test]
