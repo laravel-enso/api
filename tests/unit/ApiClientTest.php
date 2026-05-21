@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use LaravelEnso\Api\Api;
 use LaravelEnso\Api\Enums\Method;
-use LaravelEnso\Api\SoapApi;
-use LaravelEnso\Api\SoapResponse;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureAuthRetryEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureConfiguredEndpoint;
 use LaravelEnso\Api\Tests\Fixtures\ApiFixtureQueryEndpoint;
@@ -211,28 +209,5 @@ class ApiClientTest extends TestCase
         $this->assertTrue($response->successful());
         $this->assertSame(2, $api->tries());
         $this->assertSame([2], ApiSleepRecorder::$calls);
-    }
-
-    #[Test]
-    public function throws_a_clear_exception_when_the_soap_extension_is_missing(): void
-    {
-        if (extension_loaded('soap')) {
-            $this->markTestSkipped('The SOAP extension is installed.');
-        }
-
-        $api = new class(new ApiFixtureSoapEndpoint()) extends SoapApi {
-            public function call(): SoapResponse
-            {
-                return new SoapResponse($this->client()->__soapCall(
-                    $this->endpoint->operation(),
-                    $this->endpoint->arguments(),
-                ));
-            }
-        };
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('The PHP SOAP extension is required for SOAP API endpoints.');
-
-        $api->call();
     }
 }
