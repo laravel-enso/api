@@ -4,6 +4,7 @@ require_once __DIR__.'/../Support/sleep.php';
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Notification;
 use LaravelEnso\Api\Exceptions\Handler;
 use LaravelEnso\Api\Notifications\ApiCallError;
@@ -39,7 +40,7 @@ class ApiThrottleNotificationTest extends TestCase
     }
 
     #[Test]
-    public function builds_api_error_mail_messages_with_triggering_user_context(): void
+    public function builds_api_error_mail_message_data_with_triggering_user_context(): void
     {
         $triggerUser = User::first();
         $admin = User::query()->whereRoleId(Roles::Admin)->where('is_active', true)->first();
@@ -54,14 +55,12 @@ class ApiThrottleNotificationTest extends TestCase
             'Validation failed',
         ))->toMail($admin);
 
-        $this->assertStringContainsString(config('app.name'), $mail->subject);
+        $this->assertStringContainsString(Config::get('app.name'), $mail->subject);
         $this->assertStringContainsString('FetchOffersAction', $mail->subject);
-
-        $html = $mail->render()->toHtml();
-
-        $this->assertStringContainsString($admin->person->appellative(), $html);
-        $this->assertStringContainsString('Validation failed', $html);
-        $this->assertStringContainsString($triggerUser->email, $html);
+        $this->assertSame('laravel-enso/api::emails.api-call-error', $mail->markdown);
+        $this->assertSame($admin->person->appellative(), $mail->viewData['appellative']);
+        $this->assertSame('Validation failed', $mail->viewData['message']);
+        $this->assertSame($triggerUser->email, $mail->viewData['triggeredBy']['email']);
     }
 
     #[Test]
