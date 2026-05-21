@@ -2,6 +2,8 @@
 
 namespace LaravelEnso\Api\Tests\Fixtures;
 
+require_once __DIR__.'/SoapStubs.php';
+
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Collection;
 use LaravelEnso\Api\Action;
