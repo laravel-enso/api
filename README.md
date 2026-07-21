@@ -63,8 +63,6 @@ API_DEBUG=true
 - Includes a `Throttle` helper for debouncing repeated external API calls.
 - Accepts native Laravel HTTP client options through the `RequestOptions`
   contract, including Guzzle's `sink` option for streamed downloads.
-- Provides `StaticBearerToken` for integrations backed by a configured static
-  bearer token.
 - Ships the `api_logs` migration and an `Api\Models\Log` model with Enso caching traits.
 
 ::: tip Tip
