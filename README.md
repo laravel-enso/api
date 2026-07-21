@@ -61,6 +61,10 @@ API_DEBUG=true
 - Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue using shared `laravel-enso/mails` layouts and package-owned previews.
 - Provides `Resource` and `Filter` base classes for payload shaping and input validation.
 - Includes a `Throttle` helper for debouncing repeated external API calls.
+- Accepts native Laravel HTTP client options through the `RequestOptions`
+  contract, including Guzzle's `sink` option for streamed downloads.
+- Provides `StaticBearerToken` for integrations backed by a configured static
+  bearer token.
 - Ships the `api_logs` migration and an `Api\Models\Log` model with Enso caching traits.
 
 ::: tip Tip
@@ -128,6 +132,17 @@ $response = (new FetchOffersAction([
 ]))->handle();
 
 $payload = $response->json();
+```
+
+Endpoints that need native client options can implement `RequestOptions`:
+
+```php
+use LaravelEnso\Api\Contracts\RequestOptions;
+
+public function options(): array
+{
+    return ['sink' => $this->path];
+}
 ```
 
 ### SOAP action

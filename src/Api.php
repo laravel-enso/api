@@ -13,6 +13,7 @@ use LaravelEnso\Api\Contracts\Client;
 use LaravelEnso\Api\Contracts\CustomHeaders;
 use LaravelEnso\Api\Contracts\Endpoint;
 use LaravelEnso\Api\Contracts\QueryParameters;
+use LaravelEnso\Api\Contracts\RequestOptions;
 use LaravelEnso\Api\Contracts\Retry;
 use LaravelEnso\Api\Contracts\Timeout;
 use LaravelEnso\Api\Contracts\UsesAuth;
@@ -79,7 +80,13 @@ class Api implements Client
             $http->withBasicAuth($this->endpoint->username(), $this->endpoint->password());
         }
 
-        return $http->withOptions(['debug' => Config::get('enso.api.debug')])
+        $options = ['debug' => Config::get('enso.api.debug')];
+
+        if ($this->endpoint instanceof RequestOptions) {
+            $options = array_replace($options, $this->endpoint->options());
+        }
+
+        return $http->withOptions($options)
             ->{$this->method->clientMethod()}($this->url(), $this->body());
     }
 
