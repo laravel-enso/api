@@ -11,8 +11,6 @@ use LaravelEnso\Helpers\Services\Decimals;
 
 class ApiLogger
 {
-    private const SuccessfulStatuses = [200, 201, 204];
-
     public function handle($request, Closure $next)
     {
         return $next($request);
@@ -30,7 +28,7 @@ class ApiLogger
             'duration' => Decimals::sub(microtime(true), LARAVEL_START),
         ]);
 
-        if (!in_array($response->status(), self::SuccessfulStatuses, true)) {
+        if (!$response->isSuccessful()) {
             $this->report($request, $response);
         }
     }
