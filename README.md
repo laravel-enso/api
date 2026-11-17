@@ -43,6 +43,7 @@ API_DEBUG=true
 
 ## Features
 
+- Filters table rows by the actor's current role through `params.roleId`; omitting or clearing it includes all roles.
 - Wraps outbound integrations in `Action` classes that resolve and execute `Endpoint` definitions.
 - Builds requests through Laravel's HTTP client with support for:
   - bearer-token authentication
@@ -57,7 +58,7 @@ API_DEBUG=true
 - Refreshes an expiring auth token once automatically when an authenticated endpoint receives `401` or `403` on the first try.
 - Logs outbound calls in `api_logs`, including URL, route, HTTP method, status, attempt number, payload, direction, and duration.
 - Logs inbound calls through the `ApiLogger` middleware and reports non-`200` responses to administrators.
-- Provides a read-only `System > API Logs` table, with filters for user, permission, method, direction, and creation datetime.
+- Provides a read-only `System > API Logs` table, with filters for user, role, permission, method, direction, and creation datetime.
 - Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue using shared `laravel-enso/mails` layouts and package-owned previews.
 - Provides `Resource` and `Filter` base classes for payload shaping and input validation.
 - Includes a `Throttle` helper for debouncing repeated external API calls.
@@ -389,7 +390,7 @@ Permissions:
 - `system.apiLogs.tableData`
 - `system.apiLogs.exportExcel`
 
-The table defaults to `api_logs.created_at desc`, exposes `created_at` as a `datetime` column, displays resolved users and permissions, and supports filters for user, permission, method, direction, and creation datetime.
+The table defaults to `api_logs.created_at desc`, exposes `created_at` as a `datetime` column, displays resolved users and permissions, and supports filters for user, role, permission, method, direction, and creation datetime.
 
 ### Upgrade notes
 
