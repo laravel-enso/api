@@ -4,6 +4,7 @@ require_once __DIR__.'/../Fixtures/SoapStubs.php';
 require_once __DIR__.'/../Fixtures/ApiTestDoubles.php';
 require_once __DIR__.'/../Support/sleep.php';
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -90,7 +91,7 @@ class ApiClientTest extends TestCase
             $attempts++;
 
             return $attempts === 1
-                ? Http::response(['message' => 'Retry'], 500)
+                ? Http::response(['message' => 'Retry'], 503)
                 : Http::response(['ok' => true], 200);
         });
 
@@ -100,6 +101,40 @@ class ApiClientTest extends TestCase
         $this->assertTrue($response->successful());
         $this->assertSame(2, $api->tries());
         $this->assertSame([2], ApiSleepRecorder::$calls);
+    }
+
+    #[Test]
+    public function retries_after_a_connection_timeout(): void
+    {
+        Http::fakeSequence()
+            ->pushFailedConnection('cURL error 28: SSL connection timeout')
+            ->pushStatus(200);
+
+        $api = new Api(new ApiFixtureRetryEndpoint());
+
+        $this->assertSame(200, $api->call()->status());
+        $this->assertSame(2, $api->tries());
+        $this->assertSame([1], ApiSleepRecorder::$calls);
+    }
+
+    #[Test]
+    public function propagates_the_last_timeout_when_http_and_connection_errors_exhaust_retries(): void
+    {
+        Http::fakeSequence()
+            ->pushStatus(503)
+            ->pushFailedConnection('cURL error 28: SSL connection timeout');
+
+        $api = new Api(new ApiFixtureRetryEndpoint());
+
+        $this->expectException(ConnectionException::class);
+        $this->expectExceptionMessage('SSL connection timeout');
+
+        try {
+            $api->call();
+        } finally {
+            $this->assertSame(2, $api->tries());
+            $this->assertSame([1], ApiSleepRecorder::$calls);
+        }
     }
 
     #[Test]

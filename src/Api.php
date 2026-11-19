@@ -2,6 +2,7 @@
 
 namespace LaravelEnso\Api;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
@@ -37,7 +38,17 @@ class Api implements Client
     {
         $this->tries++;
 
-        $response = $this->response();
+        try {
+            $response = $this->response();
+        } catch (ConnectionException $exception) {
+            if (! $this->shouldRetry()) {
+                throw $exception;
+            }
+
+            sleep($this->endpoint->delay());
+
+            return $this->call();
+        }
 
         if ($response->failed()) {
             if ($this->possibleTokenExpiration($response)) {
