@@ -14,6 +14,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/api.php', 'enso.api');
 
+        $this->publishes([
+            __DIR__.'/../config/api.php' => $this->app->configPath('enso/api.php'),
+        ], ['api-config', 'enso-config']);
+
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-enso/api');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');

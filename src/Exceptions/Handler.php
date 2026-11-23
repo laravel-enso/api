@@ -3,6 +3,7 @@
 namespace LaravelEnso\Api\Exceptions;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Config;
 use LaravelEnso\Api\Notifications\ApiCallError;
 use LaravelEnso\Users\Models\User;
 
@@ -21,7 +22,7 @@ class Handler
     {
         $notification = $this->notification();
 
-        $this->admins()->each->notify($notification);
+        $this->users()->each->notify($notification);
     }
 
     private function notification(): ApiCallError
@@ -33,8 +34,13 @@ class Handler
         return (new ApiCallError(...$args))->onQueue('notifications');
     }
 
-    private function admins(): Collection
+    private function users(): Collection
     {
-        return User::active()->admins()->get();
+        $ids = Config::get('enso.api.errorNotificationUserIds');
+
+        return User::active()->when($ids,
+            fn ($query) => $query->whereIn('id', $ids),
+            fn ($query) => $query->admins(),
+        )->get();
     }
 }

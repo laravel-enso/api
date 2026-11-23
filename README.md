@@ -59,7 +59,7 @@ API_DEBUG=true
 - Logs outbound calls in `api_logs`, including URL, route, HTTP method, status, attempt number, payload, direction, and duration.
 - Logs inbound calls through the `ApiLogger` middleware and reports non-`200` responses to administrators.
 - Provides a read-only `System > API Logs` table, with filters for user, role, permission, method, direction, and creation datetime.
-- Queues `ApiCallError` notifications to active Enso admins on the `notifications` queue using shared `laravel-enso/mails` layouts and package-owned previews.
+- Queues `ApiCallError` notifications to configured active users, or active Enso admins by default, on the `notifications` queue using shared `laravel-enso/mails` layouts and package-owned previews.
 - Provides `Resource` and `Filter` base classes for payload shaping and input validation.
 - Includes a `Throttle` helper for debouncing repeated external API calls.
 - Accepts native Laravel HTTP client options through the `RequestOptions`
@@ -210,6 +210,23 @@ $result = $response->body();
 ```
 
 SOAP responses are wrapped in `SoapResponse`. Failed SOAP calls return a failed response internally, are logged, trigger the normal notification flow, and then throw the original `SoapFault` from `handle()`.
+
+### Error notification recipients
+
+The `enso.api.errorNotificationUserIds` array controls recipients for inbound and
+outbound API errors. An empty array (the default) notifies all active admins.
+A non-empty array notifies only active users with those IDs, regardless of role.
+If none of the configured IDs match active users, no notifications are sent;
+there is no fallback to admins.
+
+Set `API_ERROR_NOTIFICATION_USER_IDS` to a comma-separated list of user IDs.
+For example, `API_ERROR_NOTIFICATION_USER_IDS=12,34` selects active users 12 and 34.
+Omitting the variable or leaving it empty keeps the default active-admin recipients.
+Whitespace and empty entries are ignored.
+
+The configuration can also be published with
+`php artisan vendor:publish --tag=api-config` to `config/enso/api.php`.
+If configuration is cached, rebuild that cache after changing the environment value.
 
 ### Inbound logging
 
@@ -427,7 +444,7 @@ php artisan enso:upgrade
 ::: warning Note
 Inbound logging reports any non-`200` response through `ApiCallError`, while outbound actions report failed responses and thrown exceptions through the same notification pipeline.
 
-The notification handler targets active Enso admins and queues the email on the `notifications` queue.
+The notification handler uses `enso.api.errorNotificationUserIds` to select active recipients (all active admins by default) and queues the email on the `notifications` queue.
 :::
 
 ## Depends On
